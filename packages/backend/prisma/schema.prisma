@@ -1,8 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
-// Get a free hosted Postgres database in seconds: `npx create-db`
-
 generator client {
   provider = "prisma-client"
   output   = "../src/generated/prisma"
@@ -10,4 +5,96 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+  
+}
+
+enum TipoArquivo {
+  IMAGEM
+  PDF
+  TEXTO
+}
+
+enum Perfil {
+  COLABORADOR
+  GESTOR
+  FINANCEIRO
+  ADMIN
+}
+
+enum Status {
+  RASCUNHO
+  ENVIADO
+  APROVADO
+  REJEITADO
+  PAGO
+  CANCELADO
+}
+
+enum AcaoHistorico {
+  CREATED
+  UPDATED
+  SUBMITTED
+  APPROVED
+  REJECTED
+  PAID
+  CANCELED
+}
+
+model Usuario {
+  id String @id @default(uuid())
+  nome String
+  email String @unique
+  senha String
+  perfil Perfil
+  solicitacoes SolicitacaoReembolso[]
+  historicos HistoricoSolicitacao[]
+  criadoEm DateTime @default(now())
+  atualizadoEm DateTime @default(now())
+}
+
+model Categoria {
+  id Int @id @default(autoincrement())
+  nome String
+  ativo Boolean @default(true)
+  solicitacoes SolicitacaoReembolso[]
+  criadoEm DateTime @default(now())
+  atualizadoEm DateTime @default(now())
+}
+
+model SolicitacaoReembolso {
+  id String @id @default(uuid())
+  solicitanteId String
+  categoriaId Int
+  descricao String
+  valor Decimal @db.Decimal(10,2)
+  dataDespesa DateTime @db.Date
+  status Status
+  justificativaRejeicao String?
+  categoria Categoria @relation(fields: [categoriaId], references: [id])
+  usuario Usuario @relation(fields: [solicitanteId], references: [id])
+  anexos Anexo[]
+  historicos HistoricoSolicitacao[]
+  criadoEm DateTime @default(now())
+  atualizadoEm DateTime @default(now())
+}
+
+model Anexo {
+  id String @id @default(uuid())
+  solicitacaoId String
+  nomeArquivo String
+  urlArquivo String
+  tipoArquivo TipoArquivo
+  solicitacao SolicitacaoReembolso @relation(fields: [solicitacaoId], references: [id])
+  criadoEm DateTime @default(now())
+}
+
+model HistoricoSolicitacao {
+  id String @id @default(uuid())
+  solicitacaoId String
+  usuarioId String
+  acao AcaoHistorico
+  observacao String?
+  solicitacao SolicitacaoReembolso @relation(fields: [solicitacaoId], references: [id])
+  usuario Usuario @relation(fields: [usuarioId], references: [id])
+  criadoEm DateTime @default(now())
 }
