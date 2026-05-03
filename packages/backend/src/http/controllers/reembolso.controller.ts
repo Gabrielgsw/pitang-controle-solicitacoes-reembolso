@@ -60,7 +60,7 @@ export async function buscarReembolsoPorId(req: Request, res: Response) {
     const id = req.params.id;
 
     if (isNaN(id)){
-        return res.status(400).json({ message: 'ID inválido' });
+        return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});
     } 
 
     const reembolso = await prisma.solicitacaoReembolso.findUnique({
@@ -75,7 +75,9 @@ export async function buscarReembolsoPorId(req: Request, res: Response) {
         }
     });
 
-    if (!reembolso) return res.status(404).json({ message: 'Reembolso não encontrado' });
+    if (!reembolso){
+        return res.status(404).json({ message: 'Reembolso não encontrado' });
+    } 
 
     res.status(200).json(reembolso);
 }
@@ -86,9 +88,11 @@ export async function enviarReembolso(req: Request, res: Response) {
 
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
 
-    if (!reembolso) return res.status(404).json({ message: 'Reembolso não encontrado' });
+    if (!reembolso){
+        return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'});
+    } 
     if (reembolso.status !== 'RASCUNHO' && reembolso.status !== 'REJEITADO') {
-        return res.status(400).json({ message: 'Apenas rascunhos ou rejeitados podem ser enviados' });
+        return res.status(400).json({ message: 'Apenas rascunhos ou rejeitados podem ser enviados' },{statusCode: '400'}, {error: 'Bad Request'});
     }
 
     const reembolsoEnviado = await prisma.solicitacaoReembolso.update({
@@ -109,8 +113,12 @@ export async function aprovarReembolso(req: Request, res: Response) {
     const loggedUser = getUsuarioLogado(req);
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
 
-    if (!reembolso) return res.status(404).json({ message: 'Reembolso não encontrado' });
-    if (reembolso.status !== 'ENVIADO') return res.status(400).json({ message: 'Apenas reembolsos ENVIADOS podem ser aprovados' });
+    if (!reembolso){
+       return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'}); 
+    } 
+    if (reembolso.status !== 'ENVIADO'){
+       return res.status(400).json({ message: 'Apenas reembolsos ENVIADOS podem ser aprovados' },{statusCode: '400'}, {error: 'Bad Request'}); 
+    } 
 
     const reembolsoAprovado = await prisma.solicitacaoReembolso.update({
         where: { id },
@@ -129,12 +137,20 @@ export async function rejeitarReembolso(req: Request, res: Response) {
     const id = req.params.id;    
     const loggedUser = getUsuarioLogado(req);
     const { data, error } = rejeitarSolicitacaoSchema.safeParse(req.body);
-    if (error) return res.status(400).json(z.treeifyError(error).properties);
+    
+    if (error){
+        return res.status(400).json(z.treeifyError(error).properties);
+    } 
 
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
 
-    if (!reembolso) return res.status(404).json({ message: 'Reembolso não encontrado' });
-    if (reembolso.status !== 'ENVIADO') return res.status(400).json({ message: 'Apenas reembolsos ENVIADOS podem ser rejeitados' });
+    if (!reembolso){
+        return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'});
+    } 
+    if (reembolso.status !== 'ENVIADO'){
+        return res.status(400).json({ message: 'Apenas reembolsos ENVIADOS podem ser rejeitados' },{statusCode: '400'}, {error: 'Bad Request'});
+    } 
+    
 
     const reembolsoRejeitado = await prisma.solicitacaoReembolso.update({
         where: { id },
@@ -158,8 +174,12 @@ export async function pagarReembolso(req: Request, res: Response) {
     const loggedUser = getUsuarioLogado(req);
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
 
-    if (!reembolso) return res.status(404).json({ message: 'Reembolso não encontrado' });
-    if (reembolso.status !== 'APROVADO') return res.status(400).json({ message: 'Apenas reembolsos APROVADOS podem ser pagos' });
+    if (!reembolso){
+       return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'}); 
+    } 
+    if (reembolso.status !== 'APROVADO'){
+       return res.status(400).json({ message: 'Apenas reembolsos APROVADOS podem ser pagos' },{statusCode: '400'}, {error: 'Bad Request'});
+    } 
 
     const reembolsoPago = await prisma.solicitacaoReembolso.update({
         where: { id },
@@ -187,14 +207,16 @@ export async function editarReembolso(req: Request, res: Response) {
 
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
 
-    if (!reembolso) return res.status(404).json({ message: 'Reembolso não encontrado' });
+    if (!reembolso){
+       return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'}); 
+    } 
     
     if (reembolso.solicitanteId !== loggedUser.id) {
-        return res.status(403).json({ message: 'Você só pode editar suas próprias solicitações' });
+        return res.status(403).json({ message: 'Você só pode editar suas próprias solicitações' },{statusCode: '403'}, {error: 'Forbidden'});
     }
 
     if (reembolso.status !== 'RASCUNHO' && reembolso.status !== 'REJEITADO') {
-        return res.status(400).json({ message: 'Apenas solicitações em rascunho ou rejeitadas podem ser editadas' });
+        return res.status(400).json({ message: 'Apenas solicitações em rascunho ou rejeitadas podem ser editadas' },{statusCode: '400'}, {error: 'Bad Request'});
     }
 
     const reembolsoAtualizado = await prisma.solicitacaoReembolso.update({
@@ -213,12 +235,16 @@ export async function editarReembolso(req: Request, res: Response) {
 export async function listarHistoricoReembolso(req: Request, res: Response) {
     const id = req.params.id;
 
-    if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
+    if (isNaN(id)){
+       return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});
+    } 
 
     
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
-    if (!reembolso) return res.status(404).json({ message: 'Reembolso não encontrado' });
-
+    if (!reembolso){
+      return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'});
+  
+    } 
     const historicos = await prisma.historicoSolicitacao.findMany({
         where: { solicitacaoId: id },
         include: { 
@@ -233,7 +259,9 @@ export async function listarHistoricoReembolso(req: Request, res: Response) {
 export async function listarAnexosReembolso(req: Request, res: Response) {
     const id = req.params.id;
 
-    if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
+    if (isNaN(id)){
+      return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});  
+    } 
 
     const anexos = await prisma.anexo.findMany({
         where: { solicitacaoId: id }
@@ -246,17 +274,21 @@ export async function uploadAnexoReembolso(req: Request, res: Response) {
     const id = req.params.id;
     const loggedUser = getUsuarioLogado(req);
 
-    if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
+    if (isNaN(id)){
+      return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});  
+    } 
     
     const { nomeArquivo, url,tipoArquivo } = req.body; 
 
     if (!nomeArquivo || !url) {
-        return res.status(400).json({ message: 'Nome do arquivo e URL são obrigatórios' });
+        return res.status(400).json({ message: 'Nome do arquivo e URL são obrigatórios' },{statusCode: '400'}, {error: 'Bad Request'});
     }
 
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
     
-    if (!reembolso) return res.status(404).json({ message: 'Reembolso não encontrado' });
+    if (!reembolso){
+      return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'});  
+    } 
 
     const anexo = await prisma.anexo.create({
         data: {
