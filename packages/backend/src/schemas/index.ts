@@ -1,16 +1,18 @@
 import z from "zod";
-import { TipoArquivo,Perfil } from "../generated/prisma/enums";
 
+const PerfilEnum = z.enum(["COLABORADOR", "GESTOR", "FINANCEIRO", "ADMIN"]);
+
+const TipoArquivoEnum = z.enum(["IMAGEM", "PDF", "TEXTO"]);
 
 export const usuarioSchema = z.object({
     nome: z.string().min(1),
-    email: z.string(),
+    email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
     senha: z.string().min(6),
-    perfil: Perfil,
+    perfil: PerfilEnum,
 });
 
 export const loginSchema = z.object({
-    email: z.string(),
+    email: z.string().regex(/^[^\s@]+@[^\s@]+\.[^\s@]+$/),
     senha: z.string().min(1),
 });
 
@@ -20,18 +22,17 @@ export const categoriaSchema = z.object({
 });
 
 export const solicitacaoReembolsoSchema = z.object({
-    categoriaId: z.number().int().positive(),        
+    categoriaId: z.number().int().positive(),
     descricao: z.string().min(1),
     valor: z.number().positive(),
     dataDespesa: z.coerce.date(),
 });
 
-export const anexoSchema = z.object({    
+export const anexoSchema = z.object({
     nomeArquivo: z.string(),
     urlArquivo: z.string(),
-    tipoArquivo: TipoArquivo
-
-})
+    tipoArquivo: TipoArquivoEnum
+});
 
 export const rejeitarSolicitacaoSchema = z.object({
     justificativaRejeicao: z.string().min(1),

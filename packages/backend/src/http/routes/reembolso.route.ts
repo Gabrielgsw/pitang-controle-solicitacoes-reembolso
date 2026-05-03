@@ -12,19 +12,19 @@ import {
     uploadAnexoReembolso,
     pagarReembolso 
 } from '../controllers/reembolso.controller';
-
+import { roleMiddleware } from '../middlewares/perfil.middleware';
 const reembolsoRouter = express.Router();
 
 reembolsoRouter.get('/reimbursements', listarReembolsos);
-reembolsoRouter.post('/reimbursements', criarReembolso);
-reembolsoRouter.get('/reimbursements/:id', buscarReembolsoPorId);
-reembolsoRouter.put('/reimbursements/:id', editarReembolso);
-reembolsoRouter.post('/reimbursements/:id/submit', enviarReembolso);
-reembolsoRouter.post('/reimbursements/:id/approve', aprovarReembolso);
-reembolsoRouter.post('/reimbursements/:id/reject', rejeitarReembolso);
-reembolsoRouter.post('/reimbursements/:id/pay', pagarReembolso);
-reembolsoRouter.get('/reimbursements/:id/history', listarHistoricoReembolso);
-reembolsoRouter.post('/reimbursements/:id/attachments', uploadAnexoReembolso);
+reembolsoRouter.post('/reimbursements',roleMiddleware(['COLABORADOR']), criarReembolso);
+reembolsoRouter.get('/reimbursements/:id',roleMiddleware(['ADMIN','FINANCEIRO','GESTOR']), buscarReembolsoPorId);
+reembolsoRouter.put('/reimbursements/:id',roleMiddleware(['ADMIN']), editarReembolso);
+reembolsoRouter.post('/reimbursements/:id/submit',roleMiddleware(['ADMIN','COLABORADOR']), enviarReembolso);
+reembolsoRouter.post('/reimbursements/:id/approve',roleMiddleware(['GESTOR']), aprovarReembolso);
+reembolsoRouter.post('/reimbursements/:id/reject',roleMiddleware(['GESTOR']),  rejeitarReembolso);
+reembolsoRouter.post('/reimbursements/:id/pay',roleMiddleware(['FINANCEIRO']),  pagarReembolso);
+reembolsoRouter.get('/reimbursements/:id/history',roleMiddleware(['ADMIN','FINANCEIRO','GESTOR']), listarHistoricoReembolso);
+reembolsoRouter.post('/reimbursements/:id/attachments',roleMiddleware(['COLABORADOR']), uploadAnexoReembolso);
 reembolsoRouter.get('/reimbursements/:id/attachments', listarAnexosReembolso);
 
 export { reembolsoRouter };
