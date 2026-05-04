@@ -7,12 +7,28 @@
     "dev": "bun run --watch src/index.ts",
     "prisma:migrate": "bunx --bun prisma migrate dev",
     "prisma:generate": "bunx --bun prisma generate",
-    "prisma:studio": "bunx --bun prisma studio"
+    "prisma:studio": "bunx --bun prisma studio",
+    "test:db:setup": "dotenv -e .env.test -- bunx prisma migrate deploy",
+    "test:db:seed": "dotenv -e .env.test -- bun run prisma/seed.ts",
+    "pretest": "bun run test:db:setup && bun run test:db:seed",
+    "test": "NODE_OPTIONS=--experimental-vm-modules dotenv -e .env.test -- bunx jest --runInBand",
+    "posttest": "dotenv -e .env.test -- bunx prisma migrate reset --force"
   },
   "devDependencies": {
     "@types/bcryptjs": "^3.0.0",
     "@types/bun": "latest",
-    "@types/pg": "^8.20.0"
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.6",
+    "@types/jest": "^30.0.0",
+    "@types/pg": "^8.20.0",
+    "@types/supertest": "^7.2.0",
+    "dotenv-cli": "^11.0.0",
+    "jest": "^30.3.0",
+    "supertest": "^7.2.2",
+    "ts-jest": "^29.4.9"
+  },
+  "prisma": {
+    "seed": "bun run prisma/seed.ts"
   },
   "peerDependencies": {
     "typescript": "^5"
