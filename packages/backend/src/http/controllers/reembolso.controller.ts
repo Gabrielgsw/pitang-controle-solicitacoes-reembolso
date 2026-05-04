@@ -57,7 +57,7 @@ export async function listarReembolsos(req: Request, res: Response) {
 }
 
 export async function buscarReembolsoPorId(req: Request, res: Response) {
-    const id = req.params.id;
+    const id = req.params.id as string;
 
     if (!id){
         return res.status(400).json({ message: 'ID inválido' });
@@ -82,7 +82,7 @@ export async function buscarReembolsoPorId(req: Request, res: Response) {
 }
 
 export async function enviarReembolso(req: Request, res: Response) {
-    const id = req.params.id;
+    const id = req.params.id as string;
     const loggedUser = getUsuarioLogado(req);
     if (!id){
         return res.status(400).json({ message: 'ID inválido' });
@@ -119,7 +119,7 @@ export async function enviarReembolso(req: Request, res: Response) {
 }
 
 export async function aprovarReembolso(req: Request, res: Response) {
-    const id = req.params.id;    
+    const id = req.params.id as string as string;    
     const loggedUser = getUsuarioLogado(req);
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
     if (!id){
@@ -146,7 +146,7 @@ export async function aprovarReembolso(req: Request, res: Response) {
 }
 
 export async function rejeitarReembolso(req: Request, res: Response) {
-    const id = req.params.id;    
+    const id = req.params.id as string;    
     const loggedUser = getUsuarioLogado(req);
     const { data, error } = rejeitarSolicitacaoSchema.safeParse(req.body);
     if (!id){
@@ -184,7 +184,7 @@ export async function rejeitarReembolso(req: Request, res: Response) {
 }
 
 export async function pagarReembolso(req: Request, res: Response) {
-    const id = req.params.id;    
+    const id = req.params.id as string;    
     const loggedUser = getUsuarioLogado(req);
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
 
@@ -213,7 +213,7 @@ export async function pagarReembolso(req: Request, res: Response) {
 }
 
 export async function editarReembolso(req: Request, res: Response) {
-    const id = req.params.id;    
+    const id = req.params.id as string;    
     const loggedUser = getUsuarioLogado(req);
     if (!id){
         return res.status(400).json({ message: 'ID inválido' });
@@ -253,7 +253,7 @@ export async function editarReembolso(req: Request, res: Response) {
 }
 
 export async function listarHistoricoReembolso(req: Request, res: Response) {
-    const id = req.params.id;
+    const id = req.params.id as string;
 
     if (!id){
        return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});
@@ -277,7 +277,7 @@ export async function listarHistoricoReembolso(req: Request, res: Response) {
 }
 
 export async function listarAnexosReembolso(req: Request, res: Response) {
-    const id = req.params.id;
+    const id = req.params.id as string;
 
     if (!id){
       return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});  
@@ -291,7 +291,7 @@ export async function listarAnexosReembolso(req: Request, res: Response) {
 }
 
 export async function uploadAnexoReembolso(req: Request, res: Response) {
-    const id = req.params.id;
+    const id = req.params.id as string;
     const loggedUser = getUsuarioLogado(req);
 
     if (!id){
