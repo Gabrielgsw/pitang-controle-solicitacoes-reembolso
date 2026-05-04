@@ -39,7 +39,7 @@ export async function postCategoria(req: Request, res: Response) {
 }
 
 export async function putCategoria(req: Request, res: Response) {
-    const id = parseInt(req.params.id, 10);
+    const id = parseInt(req.params.id as string, 10);
 
     if (isNaN(id)) {
         return res.status(400).json({ message: "ID da categoria inválido" });

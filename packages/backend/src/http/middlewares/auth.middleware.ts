@@ -11,7 +11,7 @@ const allowedPaths = {
 
 export function authMiddleware(req: Request,res: Response, next: NextFunction){
 
-    const paths = allowedPaths[req.method as keyof typeof allowedPaths] ?? [];
+    const paths: readonly string[] = allowedPaths[req.method as keyof typeof allowedPaths] ?? [];
     
     if (paths.includes(req.path)) {
         return next();

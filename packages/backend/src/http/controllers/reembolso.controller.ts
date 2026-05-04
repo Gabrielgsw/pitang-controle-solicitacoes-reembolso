@@ -48,7 +48,7 @@ export async function listarReembolsos(req: Request, res: Response) {
         where: whereClause,
         include: {
             categoria: true,
-            solicitante: { select: { nome: true, email: true } }
+            usuario: { select: { nome: true, email: true } }
         },
         orderBy: { criadoEm: 'desc' }
     });
@@ -59,15 +59,14 @@ export async function listarReembolsos(req: Request, res: Response) {
 export async function buscarReembolsoPorId(req: Request, res: Response) {
     const id = req.params.id;
 
-    if (isNaN(id)){
-        return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});
+    if (!id){
+        return res.status(400).json({ message: 'ID inválido' });
     } 
-
     const reembolso = await prisma.solicitacaoReembolso.findUnique({
         where: { id },
         include: {
             categoria: true,
-            solicitante: { select: { nome: true, email: true, perfil: true } },
+            usuario: { select: { nome: true, email: true, perfil: true } },
             HistoricoSolicitacao: {
                 include: { autor: { select: { nome: true, perfil: true } } },
                 orderBy: { criadoEm: 'desc' }
@@ -83,16 +82,27 @@ export async function buscarReembolsoPorId(req: Request, res: Response) {
 }
 
 export async function enviarReembolso(req: Request, res: Response) {
-    const id = req.params.id;    
+    const id = req.params.id;
     const loggedUser = getUsuarioLogado(req);
-
+    if (!id){
+        return res.status(400).json({ message: 'ID inválido' });
+    } 
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
 
-    if (!reembolso){
-        return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'});
-    } 
+    if (!reembolso) {
+        return res.status(404).json({ 
+            message: 'Reembolso não encontrado', 
+            statusCode: 404, 
+            error: 'Not Found' 
+        });
+    }
+
     if (reembolso.status !== 'RASCUNHO' && reembolso.status !== 'REJEITADO') {
-        return res.status(400).json({ message: 'Apenas rascunhos ou rejeitados podem ser enviados' },{statusCode: '400'}, {error: 'Bad Request'});
+        return res.status(400).json({ 
+            message: 'Apenas rascunhos ou rejeitados podem ser enviados', 
+            statusCode: 400, 
+            error: 'Bad Request' 
+        });
     }
 
     const reembolsoEnviado = await prisma.solicitacaoReembolso.update({
@@ -112,7 +122,9 @@ export async function aprovarReembolso(req: Request, res: Response) {
     const id = req.params.id;    
     const loggedUser = getUsuarioLogado(req);
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
-
+    if (!id){
+        return res.status(400).json({ message: 'ID inválido' });
+    } 
     if (!reembolso){
        return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'}); 
     } 
@@ -137,7 +149,9 @@ export async function rejeitarReembolso(req: Request, res: Response) {
     const id = req.params.id;    
     const loggedUser = getUsuarioLogado(req);
     const { data, error } = rejeitarSolicitacaoSchema.safeParse(req.body);
-    
+    if (!id){
+        return res.status(400).json({ message: 'ID inválido' });
+    } 
     if (error){
         return res.status(400).json(z.treeifyError(error).properties);
     } 
@@ -174,6 +188,10 @@ export async function pagarReembolso(req: Request, res: Response) {
     const loggedUser = getUsuarioLogado(req);
     const reembolso = await prisma.solicitacaoReembolso.findUnique({ where: { id } });
 
+    if (!id){
+        return res.status(400).json({ message: 'ID inválido' });
+    } 
+
     if (!reembolso){
        return res.status(404).json({ message: 'Reembolso não encontrado' },{statusCode: '404'}, {error: 'Not Found'}); 
     } 
@@ -197,7 +215,9 @@ export async function pagarReembolso(req: Request, res: Response) {
 export async function editarReembolso(req: Request, res: Response) {
     const id = req.params.id;    
     const loggedUser = getUsuarioLogado(req);
-    if (isNaN(id)) return res.status(400).json({ message: 'ID inválido' });
+    if (!id){
+        return res.status(400).json({ message: 'ID inválido' });
+    } 
 
     const { data, error } = solicitacaoReembolsoSchema.safeParse(req.body);
 
@@ -235,7 +255,7 @@ export async function editarReembolso(req: Request, res: Response) {
 export async function listarHistoricoReembolso(req: Request, res: Response) {
     const id = req.params.id;
 
-    if (isNaN(id)){
+    if (!id){
        return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});
     } 
 
@@ -259,7 +279,7 @@ export async function listarHistoricoReembolso(req: Request, res: Response) {
 export async function listarAnexosReembolso(req: Request, res: Response) {
     const id = req.params.id;
 
-    if (isNaN(id)){
+    if (!id){
       return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});  
     } 
 
@@ -274,7 +294,7 @@ export async function uploadAnexoReembolso(req: Request, res: Response) {
     const id = req.params.id;
     const loggedUser = getUsuarioLogado(req);
 
-    if (isNaN(id)){
+    if (!id){
       return res.status(400).json({ message: 'ID inválido' },{statusCode: '400'}, {error: 'Bad Request'});  
     } 
     
