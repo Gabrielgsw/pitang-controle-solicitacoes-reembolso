@@ -46,6 +46,7 @@ model Usuario {
   email String @unique
   senha String
   perfil Perfil
+  tokenVerificacao String?
   solicitacoes SolicitacaoReembolso[]
   historicos HistoricoSolicitacao[]
   criadoEm DateTime @default(now())
