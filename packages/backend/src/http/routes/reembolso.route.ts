@@ -18,7 +18,7 @@ const reembolsoRouter = express.Router();
 reembolsoRouter.get('/reimbursements', listarReembolsos);
 reembolsoRouter.post('/reimbursements',roleMiddleware(['COLABORADOR']), criarReembolso);
 reembolsoRouter.get('/reimbursements/:id',roleMiddleware(['ADMIN','FINANCEIRO','GESTOR']), buscarReembolsoPorId);
-reembolsoRouter.put('/reimbursements/:id',roleMiddleware(['ADMIN']), editarReembolso);
+reembolsoRouter.put('/reimbursements/:id',roleMiddleware(['COLABORADOR']), editarReembolso);
 reembolsoRouter.post('/reimbursements/:id/submit',roleMiddleware(['ADMIN','COLABORADOR']), enviarReembolso);
 reembolsoRouter.post('/reimbursements/:id/approve',roleMiddleware(['GESTOR']), aprovarReembolso);
 reembolsoRouter.post('/reimbursements/:id/reject',roleMiddleware(['GESTOR']),  rejeitarReembolso);
