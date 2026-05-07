@@ -28,7 +28,7 @@ describe('Autenticação (POST /login)', () => {
         expect(response.body).toHaveProperty('message');
     });
 
-    test('Deve retornar erro 404/401 ao tentar logar com email inexistente', async () => {
+    test('Deve retornar erro 401 ao tentar logar com email inexistente', async () => {
         const response = await request(app)
             .post('/login')
             .send({
@@ -36,7 +36,7 @@ describe('Autenticação (POST /login)', () => {
                 senha: 'pitang123'
             });
 
-        expect([401, 404]).toContain(response.status); 
+        expect([401]).toContain(response.status); 
     });
 
     test('Deve ser barrado pelo Zod (400) ao enviar payload inválido', async () => {
