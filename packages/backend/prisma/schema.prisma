@@ -9,9 +9,9 @@ datasource db {
 }
 
 enum TipoArquivo {
-  IMAGEM
   PDF
-  TEXTO
+  PNG
+  JPG
 }
 
 enum Perfil {
@@ -46,6 +46,7 @@ model Usuario {
   email String @unique
   senha String
   perfil Perfil
+  apagado Boolean @default(false)
   tokenVerificacao String?
   solicitacoes SolicitacaoReembolso[]
   historicos HistoricoSolicitacao[]
@@ -70,6 +71,7 @@ model SolicitacaoReembolso {
   valor Decimal @db.Decimal(10,2)
   dataDespesa DateTime @db.Date
   status Status
+  apagado Boolean @default(false)
   justificativaRejeicao String?
   categoria Categoria @relation(fields: [categoriaId], references: [id])
   usuario Usuario @relation(fields: [solicitanteId], references: [id])
@@ -85,6 +87,7 @@ model Anexo {
   nomeArquivo String
   urlArquivo String
   tipoArquivo TipoArquivo
+  apagado Boolean @default(false)
   solicitacao SolicitacaoReembolso @relation(fields: [solicitacaoId], references: [id])
   criadoEm DateTime @default(now())
 }

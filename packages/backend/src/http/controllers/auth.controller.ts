@@ -34,7 +34,8 @@ export async function login(req: Request, res: Response) {
     const payload = {
         id: usuario.id,
         email: usuario.email,
-        perfil: usuario.perfil
+        perfil: usuario.perfil,
+        nome: usuario.nome
     };
 
     const token = jsonwebtoken.sign(payload, environment.JWT_SECRET, {

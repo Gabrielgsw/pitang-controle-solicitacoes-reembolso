@@ -12,11 +12,16 @@ import { prisma } from '../../core/PrismaClient';
 
 export async function getUsuarios(req: Request, res: Response){
 
-    const usuarios = await prisma.usuario.findMany({
+    try{
+        const usuarios = await prisma.usuario.findMany({
         omit: {senha: true},
     })
 
     res.status(200).json(usuarios);
+    }catch(error){
+        return res.status(500).json({message: 'Erro no servidor',statusCode: '500',error: 'Internal Server Error' })
+    }
+    
 }
 
 export async function postUsuario(req: Request, res: Response) {
@@ -49,7 +54,7 @@ export async function postUsuario(req: Request, res: Response) {
 
         return res.status(201).json(usuario);
     } catch (erro) {
-        return res.status(500).json({ erroDetalahdo: String(erro) });
+        return res.status(500).json({ erro: String(erro) });
     }
 }
 
