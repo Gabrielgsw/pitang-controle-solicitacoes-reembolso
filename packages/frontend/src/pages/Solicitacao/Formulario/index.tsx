@@ -18,7 +18,8 @@ const solicitacaoSchema = z.object({
   descricao: z.string().min(5, { message: 'A descrição deve ter no mínimo 5 caracteres.' }),
   valor: z.coerce.number().positive({ message: 'O valor deve ser maior que zero.' }),
   dataDespesa: z.string().nonempty({ message: 'A data da despesa é obrigatória.' }),
-  categoriaId: z.string().nonempty({ message: 'Selecione uma categoria.' })
+  categoriaId: z.string().nonempty({ message: 'Selecione uma categoria.' }),
+  
 });
 
 type SolicitacaoFormValues = z.infer<typeof solicitacaoSchema>;
@@ -70,7 +71,7 @@ export function SolicitacaoForm() {
           reset({
             descricao: res.data.descricao,
             valor: res.data.valor,
-            dataDespesa: res.data.dataDespesa.split('T')[0], // formatando para YYYY-MM-DD input date
+            dataDespesa: res.data.dataDespesa.split('T')[0], 
             categoriaId: res.data.categoriaId?.toString()
           });
         } catch (err) {
@@ -83,20 +84,37 @@ export function SolicitacaoForm() {
 
   const onSubmit = async (data: SolicitacaoFormValues) => {
     try {
-      setLoading(true);      
-     
+      setLoading(true);
+      
       const payload = {
         ...data,
         categoriaId: Number(data.categoriaId)
       };
 
+      let currentSolicitacaoId = id; 
+
+      
       if (isEditing) {
-        await api.put(`/reimbursements/${id}`, payload);
-        toast.success('Solicitação atualizada com sucesso!');
+        await api.put(`/reimbursements/${currentSolicitacaoId}`, payload);
       } else {
-        await api.post('/reimbursements', payload);
-        toast.success('Solicitação criada com sucesso!');
+        const response = await api.post('/reimbursements', payload);
+        currentSolicitacaoId = response.data.id; 
       }
+
+      
+      if (selectedFile && currentSolicitacaoId) {
+        const anexoPayload = {
+          nome: 'comprovante.pdf',
+          url: '/solicitacao_reembolso.pdf',
+          nomeArquivo: 'comprovante.pdf', 
+          urlArquivo: '/solicitacao_reembolso.pdf',       
+          tipoArquivo: 'PDF'              
+        };
+        
+        await api.post(`/reimbursements/${currentSolicitacaoId}/attachments`, anexoPayload);
+      }
+
+      toast.success(isEditing ? 'Solicitação atualizada com sucesso!' : 'Solicitação criada com sucesso!');
       navigate('/');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Erro ao salvar a solicitação.');
@@ -104,7 +122,6 @@ export function SolicitacaoForm() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -221,7 +238,7 @@ export function SolicitacaoForm() {
                     
                     <div className="w-full h-[400px] border rounded-md overflow-hidden bg-gray-200">
                       <iframe 
-                        src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" 
+                        src="/solicitacao_reembolso.pdf" 
                         className="w-full h-full"
                         title="Simulated PDF Preview"
                       />

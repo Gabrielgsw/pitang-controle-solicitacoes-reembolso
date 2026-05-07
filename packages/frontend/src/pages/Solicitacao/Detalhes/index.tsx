@@ -8,7 +8,7 @@ import dayjs from 'dayjs';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, CheckCircle, XCircle, CreditCard, Send, Edit, Trash } from 'lucide-react';
+import { ArrowLeft, CheckCircle, XCircle, CreditCard, Send, Edit, Trash, FileText, ExternalLink } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Textarea } from '@/components/ui/textarea';
 
@@ -55,16 +55,20 @@ export function SolicitacaoDetail() {
 
   const [solicitacao, setSolicitacao] = useState<any>(null);
   const [historico, setHistorico] = useState<any>(null);
+  const [anexos, setAnexos] = useState<any>(null);
   const [error, setError] = useState<Error | null>(null);
 
   const fetchDados = useCallback(async () => {
     try {
-      const [resSolicitacao, resHistorico] = await Promise.all([
+      const [resSolicitacao, resHistorico, resAnexos] = await Promise.all([
         api.get(`/reimbursements/${id}`),
-        api.get(`/reimbursements/${id}/history`)
+        api.get(`/reimbursements/${id}/history`),
+        api.get(`/reimbursements/${id}/attachments`)
       ]);
       setSolicitacao(resSolicitacao.data);
+      console.log("DADOS DA SOLICITAÇÃO:", resSolicitacao.data);
       setHistorico(resHistorico.data);
+      setAnexos(resAnexos.data)
     } catch (err: any) {
       setError(err);
     }
@@ -79,7 +83,7 @@ export function SolicitacaoDetail() {
       setLoadingAction(true);
       await api.post(`/reimbursements/${id}/${actionEndpoint}`, payload);
       toast.success(successMsg);
-      fetchDados(); // Refresh data
+      fetchDados(); 
       if (isRejectModalOpen) setIsRejectModalOpen(false);
     } catch (err: any) {
       toast.error(err.response?.data?.message || 'Erro ao realizar ação.');
@@ -239,7 +243,63 @@ export function SolicitacaoDetail() {
               </CardContent>
             </Card>
           </div>
-        </div>
+        </div>                
+
+        
+        <Card className="mt-6 shadow-sm border-t-4 border-t-red-400">
+          <CardHeader className="pb-3">
+            <CardTitle className="text-lg flex items-center gap-2 text-pitang-graphite">
+              <FileText className="h-5 w-5 text-red-500" /> 
+              Comprovante Digital
+            </CardTitle>
+            <CardDescription>Visualização do documento anexo</CardDescription>
+          </CardHeader>
+          <CardContent>            
+            {anexos && anexos.length > 0 ? (
+              anexos.map((anexo: any) => {                
+                const urlReal = anexo.urlArquivo || anexo.url || '';
+                const nomeReal = anexo.nomeArquivo || anexo.nome || 'Documento';
+
+                return (
+                  <div key={anexo.id} className="space-y-4">
+                    <div className="flex items-center justify-between p-2.5 border rounded-md bg-gray-50/50">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <div className="bg-red-100 text-red-600 p-1.5 rounded">
+                          <FileText className="h-4 w-4" />
+                        </div>
+                        <span className="text-xs font-medium truncate" title={nomeReal}>
+                          {nomeReal}
+                        </span>
+                      </div>
+                      <Badge variant="outline" className="text-[10px] uppercase font-bold">
+                        {anexo.tipoArquivo || 'PDF'}
+                      </Badge>
+                    </div>
+
+                    <div className="w-full aspect-[4/5] border-2 border-gray-100 rounded-lg overflow-hidden bg-gray-200 shadow-inner">
+                      {urlReal ? (
+                        <iframe
+                          src={urlReal} 
+                          className="w-full h-full"
+                          title="Preview do Comprovante"
+                        />
+                      ) : (
+                        <div className="flex items-center justify-center h-full text-sm text-muted-foreground">
+                          URL do arquivo não encontrada.
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              })
+            ) : (
+              <div className="flex flex-col items-center justify-center py-10 border-2 border-dashed rounded-lg bg-gray-50/50">
+                <XCircle className="h-10 w-10 text-gray-300 mb-2" />
+                <p className="text-sm text-muted-foreground">Nenhum comprovante anexado.</p>
+              </div>
+            )}
+          </CardContent>
+        </Card>
 
         {/* Modal Rejeição */}
         <Dialog open={isRejectModalOpen} onOpenChange={setIsRejectModalOpen}>
