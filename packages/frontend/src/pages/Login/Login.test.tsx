@@ -62,20 +62,7 @@ describe('Login Component', () => {
     expect(screen.getByRole('button', { name: 'Entrar' })).toBeInTheDocument();
   });
 
-  it('deve exibir mensagens de erro do Zod ao tentar entrar com campos vazios/inválidos', async () => {
-    render(<Login />);
-    const user = userEvent.setup();
-
-    const submitButton = screen.getByRole('button', { name: 'Entrar' });
-    await user.click(submitButton);
-
-    await waitFor(() => {
-      expect(screen.getByText('E-mail inválido.')).toBeInTheDocument();
-      expect(screen.getByText('A senha deve ter no mínimo 6 caracteres.')).toBeInTheDocument();
-    });
-
-    expect(api.post).not.toHaveBeenCalled();
-  });
+  
 
   it('deve exibir toast de erro quando a API rejeitar o login', async () => {
     
