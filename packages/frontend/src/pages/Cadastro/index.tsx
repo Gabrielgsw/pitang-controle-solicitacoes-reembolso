@@ -15,7 +15,8 @@ const registerSchema = z.object({
   nome: z.string().min(3, { message: 'O nome deve ter no mínimo 3 caracteres.' }),
   email: z.string().email({ message: 'E-mail inválido.' }),
   senha: z.string().min(6, { message: 'A senha deve ter no mínimo 6 caracteres.' }),
-  perfil: z.enum(['COLABORADOR', 'GESTOR', 'FINANCEIRO', 'ADMIN'])
+  perfil: z.enum(['COLABORADOR', 'GESTOR', 'FINANCEIRO', 'ADMIN']),
+  apagado: z.boolean().default(false)
 });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
@@ -27,7 +28,8 @@ export function Cadastro() {
   const { register, handleSubmit, formState: { errors } } = useForm<RegisterFormValues>({
     resolver: zodResolver(registerSchema),
     defaultValues: {
-      perfil: 'COLABORADOR'
+      perfil: 'COLABORADOR',
+      apagado: false
     }
   });
 

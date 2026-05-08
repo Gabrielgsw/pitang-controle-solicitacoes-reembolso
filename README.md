@@ -140,7 +140,7 @@ Certifique-se de ter instalado em sua máquina:
     bun install
 ```
  
-3. Configure o seu arquivo `.env` com a URL do banco de dados e a chave JWT Secret.
+3. Configure o seu arquivo `.env` com a URL do banco de dados e a chave JWT Secret. Copie para o `.env` a URL e altere apenas a JWT Secret.
 4. Rode este comando docker, na pasta do backend, para iniciar o banco:
 ```bash
     docker compose up -d
