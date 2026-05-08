@@ -21,7 +21,7 @@ Um sistema web desenvolvido para o Desafio Técnico do Programa de Estágio da P
 - [Axios](https://axios.dev/) - Cliente HTTP baseado em Promises para o navegador e node.js.
 - [DayJs](https://day.js.org/) - Biblioteca leve para manipulação de datas
 - [Lucide React](https://lucide.dev/) - Conjunto de ícones bem elaborados para React.
-
+- [bcryptjs](https://www.npmjs.com/package/bcryptjs?activeTab=readme) - Biblioteca para hash de senhas.
 ---
 
 ## Endpoints
@@ -140,7 +140,7 @@ Certifique-se de ter instalado em sua máquina:
     bun install
 ```
  
-3. Configure o seu arquivo `.env` com a URL do banco de dados e a chave JWT Secret. Copie para o `.env` a URL e altere apenas a JWT Secret.
+3. Configure o seu arquivo `.env` com a URL do banco de dados e a chave JWT Secret. Copie para o `.env` a URL do `.env.test` e altere apenas a JWT Secret.
 4. Rode este comando docker, na pasta do backend, para iniciar o banco:
 ```bash
     docker compose up -d
@@ -148,8 +148,7 @@ Certifique-se de ter instalado em sua máquina:
 5. Execute as migrations do banco: `bunx prisma migrate dev`
 6. Execute para carregar as configurações do prisma: `bunx prisma generate`
 7. Popule o banco de testes com o seed criado: `bunx prisma db seed`
-8. Popule o banco: `bun run .\prisma\seed.ts`
-9. Executar o servidor: `bun run dev`
+8. Executar o servidor: `bun run dev`
 
 ### Rodando o Frontend
 1. Navegue até a pasta do frontend.
@@ -176,6 +175,7 @@ bun test
 ## Usuários para teste
 | E-mail                     | Senha  | Perfil      |
 |----------------------      |--------|-------------|
+| colaborador@pitang.com | pitang123 | COLABORADOR |
 | gabriel.germano@pitang.com | pitang123 | COLABORADOR |
 | gestor@pitang.com           | pitang123 | GESTOR      |
 | financeiro@pitang.com       | pitang123 | FINANCEIRO  |
