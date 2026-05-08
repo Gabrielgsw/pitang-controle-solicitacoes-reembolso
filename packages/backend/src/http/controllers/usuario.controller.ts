@@ -32,6 +32,8 @@ export async function getUsuario(req: Request, res: Response){
         return res.status(404).json({message: 'ID inválido',statusCode: '404',error: 'Not Found' })
     }
 
+    
+
     try{
         const usuarios = await prisma.usuario.findUnique({
         where:{
@@ -39,6 +41,10 @@ export async function getUsuario(req: Request, res: Response){
         },
         omit: {senha: true},
     })
+
+        if (!usuarios) {
+            return res.status(404).json({ message: 'Usuário não encontrado', statusCode: '404' });
+        }
 
     res.status(200).json(usuarios);
     }catch(error){
@@ -72,7 +78,8 @@ export async function postUsuario(req: Request, res: Response) {
             data: {
                 ...data,
                 senha: senhaCriptografada
-            }
+            },
+            omit: {senha: true}
         });
 
         return res.status(201).json(usuario);

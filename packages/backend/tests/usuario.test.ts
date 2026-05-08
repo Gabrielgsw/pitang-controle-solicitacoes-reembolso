@@ -1,23 +1,40 @@
 import request from 'supertest';
 import { app } from '../src/app';
 import { prisma } from '../src/core/PrismaClient';
+import  bcrypt  from 'bcryptjs';
 
 describe('Testes de Usuarios', () => {
     let tokenDeAcesso: string;
     const emailDeTeste = 'novoteste@pitang.com';
 
     beforeAll(async () => {
-        const respostaLogin = await request(app)
+        
+        await prisma.usuario.deleteMany({
+            where: { email: { in: ['admin@pitang.com', emailDeTeste] } }
+        });
+
+        const hashSenha = bcrypt.hashSync('pitang123', 10);
+        
+        await prisma.usuario.create({
+            data: {
+                nome: 'Admin Teste Auth',
+                email: 'admin@pitang.com',
+                senha: hashSenha,
+                perfil: 'ADMIN'
+            }
+        });
+        
+        const loginRes = await request(app)
             .post('/login')
             .send({ email: 'admin@pitang.com', senha: 'pitang123' });
-        tokenDeAcesso = respostaLogin.body.token;
+            
+        tokenDeAcesso = loginRes.body.token;
     });
 
-    afterAll(async () => {
+    afterAll(async () => {        
         await prisma.usuario.deleteMany({
-            where: { email: emailDeTeste }
+            where: { email: { in: ['admin@pitang.com', emailDeTeste] } }
         });
-        await prisma.$disconnect();
     });
 
     describe('GET /users', () => {
@@ -53,12 +70,9 @@ describe('Testes de Usuarios', () => {
                     apagado: false
                 });
 
-            console.log("O motivo do erro 500 é:", resposta.body);
-
             expect(resposta.status).toBe(201);
             expect(resposta.body).toHaveProperty('id');
             expect(resposta.body.email).toBe(emailDeTeste);
-            //expect(resposta.body).toHaveProperty('tokenVerificacao');
         });
 
         test('Deve barrar criacao de usuario com email existente (409)', async () => {

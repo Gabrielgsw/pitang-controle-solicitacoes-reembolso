@@ -1,8 +1,35 @@
 import request from 'supertest';
 import { app } from '../src/app'; 
+import { prisma } from '../src/core/PrismaClient'; 
+import bcrypt from 'bcryptjs'; 
 
 describe('Autenticação (POST /login)', () => {
     
+    
+    beforeAll(async () => {
+        await prisma.usuario.deleteMany({
+            where: { email: 'admin@pitang.com' }
+        });
+
+        const hashSenha = bcrypt.hashSync('pitang123', 10);
+
+        await prisma.usuario.create({
+            data: {
+                nome: 'Admin Teste Auth',
+                email: 'admin@pitang.com',
+                senha: hashSenha,
+                perfil: 'ADMIN'
+            }
+        });
+    });
+
+    
+    afterAll(async () => {
+        await prisma.usuario.deleteMany({
+            where: { email: 'admin@pitang.com' }
+        });
+    });
+
     test('Deve fazer login com sucesso usando credenciais corretas', async () => {
         const response = await request(app)
             .post('/login')
