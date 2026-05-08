@@ -37,7 +37,7 @@ export function Usuarios() {
   const [paginaAtual, setPaginaAtual] = useState(1);
   const [metadados, setMetadados] = useState<{ total: number; page: number; totalPages: number } | null>(null);
 
-  // Debounce da busca
+  
   useEffect(() => {
     const timer = setTimeout(() => {
       setSearchDebounced(search);
@@ -46,7 +46,7 @@ export function Usuarios() {
     return () => clearTimeout(timer);
   }, [search]);
 
-  // Reset de página ao mudar filtros
+  
   useEffect(() => {
     setPaginaAtual(1);
   }, [filterPerfil]);
@@ -63,7 +63,7 @@ export function Usuarios() {
             perfil: filterPerfil !== 'ALL' ? filterPerfil : undefined,
           },
         });
-        // Suporte a resposta paginada ({ data, meta }) ou array simples
+        
         if (Array.isArray(response.data)) {
           setUsuarios(response.data);
           setMetadados(null);
@@ -79,8 +79,7 @@ export function Usuarios() {
     };
     fetchUsuarios();
   }, [paginaAtual, searchDebounced, filterPerfil]);
-
-  // Filtragem local (fallback quando API não filtra)
+  
   const displayUsuarios = usuarios.filter((u) => {
     if (filterPerfil !== 'ALL' && u.perfil !== filterPerfil) return false;
     if (searchDebounced && !u.nome.toLowerCase().includes(searchDebounced.toLowerCase()) &&

@@ -34,7 +34,7 @@ export function UsuarioDetalhe() {
   const [successMsg, setSuccessMsg] = useState<string | null>(null);
   const [showConfirmDelete, setShowConfirmDelete] = useState(false);
 
-  // Form state
+  
   const [nome, setNome] = useState('');
   const [email, setEmail] = useState('');
   const [perfil, setPerfil] = useState('');

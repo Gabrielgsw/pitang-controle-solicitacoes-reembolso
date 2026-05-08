@@ -45,7 +45,7 @@ export const rejeitarSolicitacaoSchema = z.object({
     justificativaRejeicao: z.string().min(1),
 });
 
-// Validação de params
+
 
 export const idCategoriaParamSchema = z.object({
     id: z.coerce.number().int().positive({ message: "O ID deve ser um número positivo" })
