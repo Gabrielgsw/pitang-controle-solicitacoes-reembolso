@@ -4,7 +4,7 @@ import { prisma } from '../src/core/PrismaClient';
 
 describe('Testes de Usuarios', () => {
     let tokenDeAcesso: string;
-    const emailDeTeste = 'novo.usuario.teste@pitang.com';
+    const emailDeTeste = 'novoteste@pitang.com';
 
     beforeAll(async () => {
         const respostaLogin = await request(app)
@@ -49,7 +49,8 @@ describe('Testes de Usuarios', () => {
                     nome: 'Usuario de Teste',
                     email: emailDeTeste,
                     senha: 'senha-super-segura',
-                    perfil: 'COLABORADOR'
+                    perfil: 'COLABORADOR',
+                    apagado: false
                 });
 
             console.log("O motivo do erro 500 é:", resposta.body);
@@ -68,9 +69,11 @@ describe('Testes de Usuarios', () => {
                     nome: 'Outro Nome',
                     email: emailDeTeste,
                     senha: 'outrasenha123',
-                    perfil: 'GESTOR'
+                    perfil: 'COLABORADOR',
+                    apagado: false
                 });
 
+            if (resposta.status === 400) console.log('Erro do Zod:', resposta.body);
             expect(resposta.status).toBe(409);
             expect(resposta.body.message).toBe('Usuário já cadastrado');
         });
