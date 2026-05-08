@@ -1,6 +1,7 @@
 import request from 'supertest';
-import { app } from '../src/app';
+import { app } from '../src/app'; // Ajuste o caminho se necessário
 import { prisma } from '../src/core/PrismaClient';
+import bcrypt from 'bcryptjs';
 
 describe('Testes de Categorias', () => {
     let adminToken: string;
@@ -10,22 +11,55 @@ describe('Testes de Categorias', () => {
     const nomeCategoriaNova = 'Teste Nova Categoria';
     
     beforeAll(async () => {        
+        // 1. Limpa resquícios de testes anteriores e cria os usuários
+        await prisma.usuario.deleteMany({
+            where: { email: { in: ['admin@pitang.com', 'gabriel.germano@pitang.com'] } }
+        });
+
+        const hashSenha = bcrypt.hashSync('pitang123', 10);
+
+        await prisma.usuario.createMany({
+            data: [
+                {
+                    nome: 'Admin Teste',
+                    email: 'admin@pitang.com',
+                    senha: hashSenha,
+                    perfil: 'ADMIN'
+                },
+                {
+                    nome: 'Gabriel User',
+                    email: 'gabriel.germano@pitang.com',
+                    senha: hashSenha,
+                    perfil: 'COLABORADOR'
+                }
+            ]
+        });
+
+        // 2. Com os usuários no banco, agora fazemos o login!
         const adminLogin = await request(app)
             .post('/login')
             .send({ email: 'admin@pitang.com', senha: 'pitang123' });
+        
         adminToken = adminLogin.body.token;
         
         const userLogin = await request(app)
             .post('/login')
             .send({ email: 'gabriel.germano@pitang.com', senha: 'pitang123' });
+        
         userToken = userLogin.body.token;
     });
     
     afterAll(async () => {
+        // Limpa as categorias
         await prisma.categoria.deleteMany({
             where: {
                 nome: { in: [nomeCategoriaOriginal, nomeCategoriaNova, 'Categoria Duplicada'] }
             }
+        });
+        
+        // Limpa os usuários de teste
+        await prisma.usuario.deleteMany({
+            where: { email: { in: ['admin@pitang.com', 'gabriel.germano@pitang.com'] } }
         });
     });
 
@@ -87,7 +121,7 @@ describe('Testes de Categorias', () => {
                 .put(`/categories/${categoriaTesteId}`)
                 .set('Authorization', `Bearer ${adminToken}`)
                 .send({ nome: nomeCategoriaNova });
-
+            
             expect(resposta.status).toBe(200);
             expect(resposta.body.nome).toBe(nomeCategoriaNova);
         });
