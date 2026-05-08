@@ -10,6 +10,7 @@ export const usuarioSchema = z.object({
     tokenVerificacao: z.string().optional(),
     senha: z.string().min(6),
     perfil: PerfilEnum,
+    apagado: z.boolean()
 });
 
 export const loginSchema = z.object({
@@ -60,5 +61,8 @@ export const paginacaoQuerySchema = z.object({
 });
 
 export const listarReembolsosQuerySchema = paginacaoQuerySchema.extend({
-    status: StatusReembolsoEnum.optional(),
+  status: StatusReembolsoEnum.optional(),
+  categoriaId: z.string().optional(), 
+  search: z.string().optional(),      
+  sort: z.enum(['asc', 'desc']).optional().default('desc') 
 });

@@ -5,7 +5,7 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
 import { api } from '../../../api/api';
 import { toast } from 'react-toastify';
-
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,8 +17,20 @@ import { ArrowLeft, X, UploadCloud } from 'lucide-react';
 const solicitacaoSchema = z.object({
   descricao: z.string().min(5, { message: 'A descrição deve ter no mínimo 5 caracteres.' }),
   valor: z.coerce.number().positive({ message: 'O valor deve ser maior que zero.' }),
-  dataDespesa: z.string().nonempty({ message: 'A data da despesa é obrigatória.' }),
-  categoriaId: z.string().nonempty({ message: 'Selecione uma categoria.' })
+  dataDespesa: z.string()
+    .nonempty({ message: 'A data da despesa é obrigatória.' })
+    .refine((val) => {
+      const data = new Date(val);
+      return data.getFullYear() >= 2004;
+    }, { message: 'A data não pode ser anterior a 2004.' })
+    .refine((val) => {
+      const data = new Date(val);
+      const hoje = new Date();
+      hoje.setHours(23, 59, 59, 999);
+      return data <= hoje;
+    }, { message: 'A data não pode ser uma data futura.' }),
+  categoriaId: z.string().nonempty({ message: 'Selecione uma categoria.' }),
+  
 });
 
 type SolicitacaoFormValues = z.infer<typeof solicitacaoSchema>;
@@ -38,7 +50,9 @@ export function SolicitacaoForm() {
   const [categorias, setCategorias] = useState<Categoria[]>([]);
   const [solicitacaoAtual, setSolicitacaoAtual] = useState<any>(null);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
+ const [cotacao, setCotacao] = useState<number | null>(null);
+  const [moeda, setMoeda] = useState<'BRL' | 'USD' | 'ARS' | 'EUR' | 'CNY'>('BRL');
+  const [loadingCambio, setLoadingCambio] = useState(false);
   const { register, handleSubmit, setValue, formState: { errors }, reset, control } = useForm<SolicitacaoFormValues>({
     resolver: zodResolver(solicitacaoSchema) as any,    
     defaultValues: {
@@ -48,6 +62,25 @@ export function SolicitacaoForm() {
       categoriaId: '' 
     }
   });
+
+  const converterMoeda = async (valorOriginal: number) => {
+    if (moeda === 'BRL' || !valorOriginal || isNaN(valorOriginal)) return;
+    try {
+      setLoadingCambio(true);
+      const response = await axios.get(`https://economia.awesomeapi.com.br/json/last/${moeda}-BRL`);
+      const chave = `${moeda}BRL`;
+      const taxa = parseFloat(response.data[chave].bid);
+      setCotacao(taxa);     
+      setValue('valor', parseFloat((valorOriginal * taxa).toFixed(2)));    
+      
+    } catch (err) {
+      toast.error('Erro ao buscar cotação.');
+    } finally {
+      setLoadingCambio(false);
+    }
+  };
+
+  
 
   useEffect(() => {
     const fetchCategorias = async () => {
@@ -70,7 +103,7 @@ export function SolicitacaoForm() {
           reset({
             descricao: res.data.descricao,
             valor: res.data.valor,
-            dataDespesa: res.data.dataDespesa.split('T')[0], // formatando para YYYY-MM-DD input date
+            dataDespesa: res.data.dataDespesa.split('T')[0], 
             categoriaId: res.data.categoriaId?.toString()
           });
         } catch (err) {
@@ -83,20 +116,51 @@ export function SolicitacaoForm() {
 
   const onSubmit = async (data: SolicitacaoFormValues) => {
     try {
-      setLoading(true);      
-     
+      setLoading(true);
+      let valorFinal = data.valor
+      if (moeda !== 'BRL') {
+      try {
+        const response = await axios.get(`https://economia.awesomeapi.com.br/json/last/${moeda}-BRL`);
+        const chave = `${moeda}BRL`;
+        const taxa = parseFloat(response.data[chave].bid);
+        setCotacao(taxa);
+        valorFinal = parseFloat((data.valor * taxa).toFixed(2));
+      } catch {
+        toast.error('Erro ao buscar cotação. Tente novamente.');
+        setLoading(false);
+        return; 
+      }
+    }
       const payload = {
         ...data,
+        valor: valorFinal,
         categoriaId: Number(data.categoriaId)
       };
 
+      let currentSolicitacaoId = id; 
+      
+      
       if (isEditing) {
-        await api.put(`/reimbursements/${id}`, payload);
-        toast.success('Solicitação atualizada com sucesso!');
+        await api.put(`/reimbursements/${currentSolicitacaoId}`, payload);
       } else {
-        await api.post('/reimbursements', payload);
-        toast.success('Solicitação criada com sucesso!');
+        const response = await api.post('/reimbursements', payload);
+        currentSolicitacaoId = response.data.id; 
       }
+
+      
+      if (selectedFile && currentSolicitacaoId) {
+        const anexoPayload = {
+          nome: 'comprovante.pdf',
+          url: '/solicitacao_reembolso.pdf',
+          nomeArquivo: 'comprovante.pdf', 
+          urlArquivo: '/solicitacao_reembolso.pdf',       
+          tipoArquivo: 'PDF'              
+        };
+        
+        await api.post(`/reimbursements/${currentSolicitacaoId}/attachments`, anexoPayload);
+      }
+
+      toast.success(isEditing ? 'Solicitação atualizada com sucesso!' : 'Solicitação criada com sucesso!');
       navigate('/');
     } catch (error: any) {
       toast.error(error.response?.data?.message || 'Erro ao salvar a solicitação.');
@@ -104,7 +168,6 @@ export function SolicitacaoForm() {
       setLoading(false);
     }
   };
-
   return (
     <div className="min-h-screen bg-gray-50 p-4 md:p-8">
       <div className="max-w-2xl mx-auto space-y-6">
@@ -131,29 +194,61 @@ export function SolicitacaoForm() {
                 {errors.descricao && <p className="text-sm text-destructive">{errors.descricao.message}</p>}
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="valor">Valor (R$)</Label>
+              <div className="space-y-2">
+                <Label htmlFor="valor">Valor</Label>
+                <div className="flex gap-2">
+                  <Select value={moeda} onValueChange={(v: 'BRL' | 'USD' | 'ARS' | 'EUR' | 'CNY') => {
+                    setMoeda(v);
+                    setCotacao(null);
+                    
+                  }}>
+                    <SelectTrigger className="w-28 shrink-0">
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="BRL">R$ BRL</SelectItem>
+                      <SelectItem value="USD">$ USD</SelectItem>
+                      <SelectItem value="EUR">€ EUR</SelectItem>
+                      <SelectItem value="ARS">$ ARS</SelectItem>
+                      <SelectItem value="CNY">¥ CNY</SelectItem>
+                    </SelectContent>
+                  </Select>
                   <Input
                     id="valor"
                     type="number"
                     step="0.01"
                     placeholder="0.00"
-                    {...register('valor')}
+                    {...register('valor', {                      
+                    })}
                   />
-                  {errors.valor && <p className="text-sm text-destructive">{errors.valor.message}</p>}
                 </div>
+
+                {/* Exibe a cotação usada */}
+                {moeda !== 'BRL' && cotacao && (
+                  <p className="text-xs text-muted-foreground">
+                    Cotação: <span className="font-medium">1 {moeda} = R$ {cotacao.toFixed(4)}</span>
+                    {loadingCambio && ' · Atualizando...'}
+                  </p>
+                )}
+                {moeda !== 'BRL' && loadingCambio && !cotacao && (
+                  <p className="text-xs text-muted-foreground">Buscando cotação...</p>
+                )}
+
+                {errors.valor && <p className="text-sm text-destructive">{errors.valor.message}</p>}
+              </div>
 
                 <div className="space-y-2">
                   <Label htmlFor="dataDespesa">Data da Despesa</Label>
                   <Input
                     id="dataDespesa"
                     type="date"
+                    min="2004-01-01"
+                    max={new Date().toISOString().split('T')[0]}
                     {...register('dataDespesa')}
                   />
                   {errors.dataDespesa && <p className="text-sm text-destructive">{errors.dataDespesa.message}</p>}
                 </div>
-              </div>
+             
 
               <div className="space-y-2">
                 <Label htmlFor="categoria">Categoria</Label>
@@ -221,7 +316,7 @@ export function SolicitacaoForm() {
                     
                     <div className="w-full h-[400px] border rounded-md overflow-hidden bg-gray-200">
                       <iframe 
-                        src="https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf" 
+                        src="/solicitacao_reembolso.pdf" 
                         className="w-full h-full"
                         title="Simulated PDF Preview"
                       />

@@ -9,6 +9,8 @@ import { Dashboard } from '@/pages/Dashboard';
 import { SolicitacaoForm } from '@/pages/Solicitacao/Formulario';
 import { SolicitacaoDetail } from '@/pages/Solicitacao/Detalhes';
 import { Categorias } from '@/pages/Categorias';
+import { UsuarioDetalhe } from './pages/Usuario/Detalhes';
+import { Usuarios } from './pages/Usuario/User';
 
 function ProtectedRoute({ children, requiredRole }: { children: JSX.Element, requiredRole?: string }) {
   const { isAuthenticated, isLoading, user } = useAuth();
@@ -54,6 +56,15 @@ export function App() {
           <Route 
             path="/categorias" 
             element={<ProtectedRoute requiredRole="ADMIN"><Categorias /></ProtectedRoute>} 
+          />
+          <Route
+            path='/usuarios'
+            element={<ProtectedRoute requiredRole="ADMIN">< Usuarios/></ProtectedRoute>} 
+          />
+            
+          <Route
+          path='/usuarios/:id'
+            element={<ProtectedRoute requiredRole="ADMIN"><UsuarioDetalhe /></ProtectedRoute>} 
           />
           
           {/* Fallback */}
