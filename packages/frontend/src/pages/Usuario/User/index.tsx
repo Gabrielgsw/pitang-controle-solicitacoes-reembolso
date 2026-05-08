@@ -220,7 +220,7 @@ export function Usuarios() {
                 Voltar
               </Button>
             </Link>
-            <Link to="/usuarios/novo">
+            <Link to="/cadastro">
               <Button>
                 <PlusCircle className="mr-2 h-4 w-4" />
                 Novo Usuário
