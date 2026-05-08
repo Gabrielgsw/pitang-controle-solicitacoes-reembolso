@@ -1,0 +1,509 @@
+{
+  "info": {
+    "_postman_id": "fc6e97d3-581d-4b7b-9f26-27658769dabb",
+    "name": "desafio-pitang",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "27256042"
+  },
+  "item": [
+    {
+      "name": "Login",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"email\": \"admin@pitang.com\",\r\n    \"senha\": \"pitang123\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3131/login",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "login"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Criar Categoria",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"nome\": \"Transporte1\",\r\n    \"ativo\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3131/categories",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "categories"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Categorias",
+      "protocolProfileBehavior": {
+        "disableBodyPruning": true
+      },
+      "request": {
+        "method": "GET",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3131/categories",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "categories"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Atualizar Categoria",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"nome\": \"Transporte2\",\r\n    \"ativo\": true\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3131/categories/1",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "categories",
+            "1"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Criar usuário",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"nome\": \"Maria Santos\",\r\n    \"email\": \"gestor123@pitang.com\",\r\n    \"perfil\": \"GESTOR\",\r\n    \"apagado\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3131/users",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "users"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Atualizar Usuário",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/users/id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "users",
+            "id"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Usuários",
+      "request": {
+        "method": "GET",
+        "header": []
+      },
+      "response": []
+    },
+    {
+      "name": "Deletar Usuário",
+      "request": {
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/users/id",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "users",
+            "id"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Buscar reembolso",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/372506ec-18dc-4579-9914-fa1a52e2e4b0",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "372506ec-18dc-4579-9914-fa1a52e2e4b0"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar reembolsos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Editar reembolso",
+      "request": {
+        "method": "PUT",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n        \"categoriaId\": 1,\r\n        \"descricao\": \"Alimentação para ir até Igarassu\",\r\n        \"valor\": 55.99,\r\n        \"dataDespesa\": \"2020-01-21\",\r\n        \"status\": \"RASCUNHO\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/2658d750-81df-44bc-9f51-8148dfed208a",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "2658d750-81df-44bc-9f51-8148dfed208a"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Solicitação de reembolso",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"categoriaId\": 122,\r\n    \"descricao\": \"11\",\r\n    \"valor\": \"55.99\",\r\n    \"dataDespesa\": \"2020-01-26\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3131/reimbursements",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Enviar Reembolso",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/id/submit",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "id",
+            "submit"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Aprovar Reembolso",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/id/approve",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "id",
+            "approve"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Rejeitar Reembolso",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/id/reject",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "id",
+            "reject"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Cancelar Reembolso",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/id/cancel",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "id",
+            "cancel"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Pagar Reembolso",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/id/pay",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "id",
+            "pay"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Listar Historico Reembolso",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/id/history",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "id",
+            "history"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "ListarAnexos",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/64650934-cb09-4cd0-bfda-d619b261ff40/attachments",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "64650934-cb09-4cd0-bfda-d619b261ff40",
+            "attachments"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Upload Anexo Reembolso",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n    \"solicitacaoId\": \"id_solicitacao\",\r\n    \"nomeArquivo\": \"comprovante.pdf\",\r\n    \"urlArquivo\": \"/solicitacao_reembolso.pdf\",\r\n    \"tipoArquivo\": \"PDF\",\r\n    \"apagado\": false\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:3131/reimbursements/id/attachments",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "3131",
+          "path": [
+            "reimbursements",
+            "id",
+            "attachments"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjlmYTNhODgyLTcwMjMtNDhmNi05YzkwLTE2ZDQ0YmExMzkzNSIsImVtYWlsIjoiYWRtaW5AcGl0YW5nLmNvbSIsInBlcmZpbCI6IkFETUlOIiwibm9tZSI6Ikpvw6NvIENhcmxvcyIsImlhdCI6MTc3ODE5NzA3NywiZXhwIjoxNzc4MjgzNDc3fQ.bO1G6H2A75Tbd4d6fYhmheODDrMKuvs3yq40PgTIgKQ",
+        "type": "string"
+      }
+    ]
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    },
+    {
+      "listen": "test",
+      "script": {
+        "type": "text/javascript",
+        "packages": {},
+        "requests": {},
+        "exec": [
+          ""
+        ]
+      }
+    }
+  ]
+}
