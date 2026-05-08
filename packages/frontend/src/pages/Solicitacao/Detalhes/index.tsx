@@ -330,7 +330,7 @@ export function SolicitacaoDetail() {
           </DialogContent>
         </Dialog>
 
-        {/* Modal de Confirmação Genérico */}
+        {/* Modal de Confirmação */}
         <Dialog open={confirmModal.isOpen} onOpenChange={(isOpen) => setConfirmModal(prev => ({ ...prev, isOpen }))}>
           <DialogContent>
             <DialogHeader>

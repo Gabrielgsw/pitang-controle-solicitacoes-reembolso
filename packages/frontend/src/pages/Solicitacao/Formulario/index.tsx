@@ -223,7 +223,7 @@ export function SolicitacaoForm() {
                   />
                 </div>
 
-                {/* Exibe a cotação usada */}
+                
                 {moeda !== 'BRL' && cotacao && (
                   <p className="text-xs text-muted-foreground">
                     Cotação: <span className="font-medium">1 {moeda} = R$ {cotacao.toFixed(4)}</span>

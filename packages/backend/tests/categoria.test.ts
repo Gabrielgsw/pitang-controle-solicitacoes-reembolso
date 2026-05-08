@@ -1,5 +1,5 @@
 import request from 'supertest';
-import { app } from '../src/app'; // Ajuste o caminho se necessário
+import { app } from '../src/app'; 
 import { prisma } from '../src/core/PrismaClient';
 import bcrypt from 'bcryptjs';
 

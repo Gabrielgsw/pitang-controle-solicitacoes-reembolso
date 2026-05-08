@@ -18,7 +18,7 @@ api.interceptors.response.use(
     if (error.response?.status === 401) {
       localStorage.removeItem('pitang_token');
       localStorage.removeItem('pitang_user');
-      // Evitar reload infinito 
+      
       if (window.location.pathname !== '/login' && window.location.pathname !== '/cadastro') {
         window.location.href = '/login';
       }

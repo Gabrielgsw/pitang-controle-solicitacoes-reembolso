@@ -32,15 +32,12 @@ const statusColorMap: Record<string, string> = {
 
 export function Dashboard() {
   const { user, logout } = useAuth();
-  
-  // Utilizando Axios para buscar as solicitações. 
-  // O backend deve retornar apenas o que o usuário tem permissão para ver.
+   
   const [data, setData] = useState<Reimbursement[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [paginaAtual, setPaginaAtual] = useState(1);
-  const [dados, setDados] = useState([]);  
-  // States for Admin Filters
+  const [dados, setDados] = useState([]);    
   const [filterStatus, setFilterStatus] = useState<string>('ALL');
   const [filterCategoria, setFilterCategoria] = useState<string>('ALL');
   const [searchColaborador, setSearchColaborador] = useState<string>('');
@@ -80,7 +77,7 @@ export function Dashboard() {
   useEffect(() => {
       const timer = setTimeout(() => {
         setSearchDebounced(searchColaborador);
-        setPaginaAtual(1); // reset de página ao buscar
+        setPaginaAtual(1); 
       }, 500);
 
       return () => clearTimeout(timer);

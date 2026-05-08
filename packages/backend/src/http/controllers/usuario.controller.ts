@@ -107,13 +107,13 @@ export async function putUsuario(req: Request, res: Response) {
             return res.status(404).json({ message: 'Usuário não encontrado' });
         }
 
-        // Se vier nova senha, recriptografar
+        
         if (data.senha) {
             const hash = bcrypt.genSaltSync(10);
             data.senha = bcrypt.hashSync(data.senha, hash);
         }
 
-        // Se vier novo email, verificar duplicidade
+        
         if (data.email && data.email !== usuarioExistente.email) {
             const emailEmUso = await prisma.usuario.findUnique({
                 where: { email: data.email }
