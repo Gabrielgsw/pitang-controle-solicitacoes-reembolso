@@ -147,7 +147,9 @@ Certifique-se de ter instalado em sua máquina:
 ```
 5. Execute as migrations do banco: `bunx prisma migrate dev`
 6. Execute para carregar as configurações do prisma: `bunx prisma generate`
-7. Popule o banco com o seed criado: `bunx prisma db seed`
+7. Popule o banco de testes com o seed criado: `bunx prisma db seed`
+8. Popule o banco: `bun run .\prisma\seed.ts`
+9. Executar o servidor: `bun run dev`
 
 ### Rodando o Frontend
 1. Navegue até a pasta do frontend.
