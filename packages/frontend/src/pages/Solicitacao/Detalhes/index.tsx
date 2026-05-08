@@ -159,8 +159,16 @@ export function SolicitacaoDetail() {
                         <span className="absolute -left-[9px] top-1 h-4 w-4 rounded-full bg-primary ring-4 ring-white" />
                         <div className="flex flex-col">
                           <span className="text-sm font-semibold">{h.acao}</span>
-                          <span className="text-xs text-muted-foreground">{dayjs(h.criadoEm).format('DD/MM/YYYY HH:mm')} - Por usuário {h.usuarioId}</span>
-                          {h.observacao && <span className="text-sm mt-1 text-gray-600">{h.observacao}</span>}
+                          <span className="text-xs text-muted-foreground">Criado em: {dayjs(h.criadoEm).format('DD/MM/YYYY HH:mm')} </span>
+                          {user?.perfil === 'ADMIN' &&(
+                            <>
+                            <span className="text-xs text-muted-foreground"> Por usuário {h.usuarioId}</span>
+                            {h.observacao &&(
+                              <span className="text-sm mt-1 text-gray-600">{h.observacao}</span>
+                            ) }
+                            </>
+                          )}                                                                         
+                          
                         </div>
                       </li>
                     ))}
