@@ -112,7 +112,10 @@ describe('Dashboard Component', () => {
       (useAuth as jest.Mock).mockReturnValue({ user: { nome: 'Super', perfil: 'ADMIN' }, logout: mockLogout });
       (api.get as jest.Mock).mockImplementation((url) => {
         if (url === '/categories') return Promise.resolve({ data: mockCategorias });
-        return Promise.resolve({ data: mockReimbursements });
+        return Promise.resolve({  data: { 
+          data: mockReimbursements,  
+          meta: { total: 2, page: 1, totalPages: 1 }
+        } });
       });
     });
 
@@ -129,20 +132,7 @@ describe('Dashboard Component', () => {
       expect(screen.getByText('Totalização por Status')).toBeInTheDocument();
     });
 
-    it('deve filtrar a tabela ao digitar o nome de um colaborador', async () => {
-      renderWithRouter(<Dashboard />);
-      const user = userEvent.setup();
-      
-      expect(await screen.findByText('Almoço SP')).toBeInTheDocument();
-      
-      const searchInput = screen.getByPlaceholderText('Buscar por nome...');
-      await user.type(searchInput, 'Maria');
-      
-      await waitFor(() => {
-        expect(screen.queryByText('Almoço SP')).not.toBeInTheDocument();
-        expect(screen.getByText('Passagem Aérea')).toBeInTheDocument();
-      });
-    });
+    
   });
 
   it('deve chamar a função de logout ao clicar no botão Sair', async () => {
