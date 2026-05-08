@@ -17,6 +17,12 @@ const usuarios = [
         perfil: Perfil.ADMIN,
     },
     {
+        nome: 'Colaborador',
+        email: 'colaborador@pitang.com',
+        senha: hashPassword('pitang123'),
+        perfil: Perfil.COLABORADOR,
+    },
+    {
         nome: 'Gabriel Germano',
         email: 'gabriel.germano@pitang.com',
         senha: hashPassword('pitang123'),
@@ -84,3 +90,5 @@ main()
         process.exit(1);
     })
     .finally(() => prisma.$disconnect());
+
+export {main as seed}
