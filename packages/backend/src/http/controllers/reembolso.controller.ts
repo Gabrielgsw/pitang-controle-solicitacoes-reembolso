@@ -15,7 +15,8 @@ export async function criarReembolso(req: Request, res: Response) {
             error: 'Bad Request'});
     }
 
-    try{
+    try{             
+
         const validaCategoria = await prisma.categoria.findUnique({where: {id: data?.categoriaId}})
         if(!validaCategoria || !validaCategoria.ativo){
             return res.status(400).json({ 
@@ -42,6 +43,7 @@ export async function criarReembolso(req: Request, res: Response) {
         });
 
         res.status(201).json(reembolso);
+        
     }catch(error){
         return res.status(500).json({message: 'Erro no servidor',statusCode: '500',error: 'Internal Server Error' })
     }
@@ -49,34 +51,83 @@ export async function criarReembolso(req: Request, res: Response) {
 }
 
 export async function listarReembolsos(req: Request, res: Response) {
-
     const loggedUser = getUsuarioLogado(req);
     
-    try{
-        let whereClause = {};
+    try {
+        // 1. Valida e extrai os parâmetros da query usando o Zod
+        const { page, limit, status, categoriaId, search, sort } = listarReembolsosQuerySchema.parse(req.query);
+
+        // 2. Calcula quantos registros pular (offset)
+        const skip = (page - 1) * limit;
     
+        let baseWhere: any = {};
+    
+        // 3. Regras de visibilidade por perfil
         if (loggedUser.perfil === 'COLABORADOR') {
-            whereClause = { solicitanteId: loggedUser.id };
+            baseWhere = { solicitanteId: loggedUser.id };
         } else if (loggedUser.perfil === 'GESTOR') {
-            whereClause = { OR: [{ solicitanteId: loggedUser.id }, { status: 'ENVIADO' }] };
+            baseWhere = { OR: [{ solicitanteId: loggedUser.id }, { status: 'ENVIADO' }] };
         } else if (loggedUser.perfil === 'FINANCEIRO') {
-            whereClause = { OR: [{ solicitanteId: loggedUser.id }, { status: 'APROVADO' }] };
+            baseWhere = { OR: [{ solicitanteId: loggedUser.id }, { status: 'APROVADO' }] };
         }
         
-        const reembolsos = await prisma.solicitacaoReembolso.findMany({
-            where: whereClause,
-            include: {
-                categoria: true,
-                usuario: { select: { nome: true, email: true } }
-            },
-            orderBy: { criadoEm: 'desc' }
+        // 4. Aplica o filtro de status da query (se existir), mesclando com as regras base
+        let andConditions: any[] = [baseWhere];
+
+        if (status) {
+            andConditions.push({ status: status });
+        }
+        if (categoriaId) {
+            andConditions.push({ categoriaId: Number(categoriaId) }); 
+        }
+        if (search) {
+            andConditions.push({
+                usuario: { nome: { contains: search, mode: 'insensitive' } } 
+            });
+        }
+
+        const whereClause = { AND: andConditions };
+        
+        
+        // 5. Executa a contagem total e a busca paginada em paralelo para maior performance
+        const [total, reembolsos] = await Promise.all([
+            prisma.solicitacaoReembolso.count({ where: whereClause }),
+            prisma.solicitacaoReembolso.findMany({
+                where: whereClause,
+                skip: skip,
+                take: limit,
+                include: {
+                    categoria: true,
+                    usuario: { select: { nome: true, email: true } }
+                },
+                orderBy: { dataDespesa: sort }
+            })
+        ]);
+
+        // 6. Monta a resposta com os metadados de paginação
+        const totalPages = Math.ceil(total / limit);
+
+        return res.status(200).json({
+            data: reembolsos,
+            meta: {
+                total,
+                page,
+                limit,
+                totalPages,
+                hasNextPage: page < totalPages,
+                hasPreviousPage: page > 1
+            }
         });
 
-        res.status(200).json(reembolsos);
-    }catch(error){
-        return res.status(500).json({message: 'Erro no servidor',statusCode: '500',error: 'Internal Server Error' })
+    } catch (error: any) {
+        // Se for um erro do Zod (parâmetros inválidos), retorna 400
+        if (error.name === 'ZodError') {
+            return res.status(400).json({ message: 'Parâmetros inválidos', errors: error.errors });
+        }
+
+        console.error('Erro ao listar reembolsos:', error);
+        return res.status(500).json({ message: 'Erro no servidor', statusCode: '500', error: 'Internal Server Error' });
     }
-    
 }
 
 export async function buscarReembolsoPorId(req: Request, res: Response) {
@@ -135,7 +186,7 @@ export async function enviarReembolso(req: Request, res: Response) {
         });
     }
 
-    if(loggedUser.perfil !== 'ADMIN'){
+    //if(loggedUser.perfil !== 'ADMIN'){
 
         if (reembolso.status !== 'RASCUNHO') {
             return res.status(400).json({ 
@@ -152,7 +203,7 @@ export async function enviarReembolso(req: Request, res: Response) {
                 error: 'Forbidden' 
             });
         }
-        }
+        //}
 
         const reembolsoEnviado = await prisma.solicitacaoReembolso.update({
             where: { id },
@@ -187,7 +238,7 @@ export async function aprovarReembolso(req: Request, res: Response) {
        return res.status(404).json({ message: 'Reembolso não encontrado' ,statusCode: '404', error: 'Not Found'}); 
     }     
 
-    if(loggedUser.perfil !== 'ADMIN'){
+    //if(loggedUser.perfil !== 'ADMIN'){
 
         if (reembolso.status !== 'ENVIADO'){
             return res.status(400).json({ message: 'Apenas reembolsos ENVIADOS podem ser aprovados' ,statusCode: '400', error: 'Bad Request'}); 
@@ -196,7 +247,7 @@ export async function aprovarReembolso(req: Request, res: Response) {
         if (loggedUser.perfil !== 'GESTOR'){
             return res.status(403).json({ message: 'Perfil inválido' ,statusCode: '400', error: 'Bad Request'}); 
         } 
-        }
+        //}
 
         const reembolsoAprovado = await prisma.solicitacaoReembolso.update({
             where: { id },
@@ -236,7 +287,7 @@ export async function rejeitarReembolso(req: Request, res: Response) {
             return res.status(404).json({ message: 'Reembolso não encontrado' ,statusCode: '404', error: 'Not Found'});
         } 
 
-        if(loggedUser.perfil !== 'ADMIN'){
+        //if(loggedUser.perfil !== 'ADMIN'){
 
             if (reembolso.status !== 'ENVIADO'){
                 return res.status(400).json({ message: 'Apenas reembolsos com o status "ENVIADO" e com justificativa podem ser rejeitados' ,statusCode: '400', error: 'Bad Request'});
@@ -245,7 +296,7 @@ export async function rejeitarReembolso(req: Request, res: Response) {
             if (loggedUser.perfil !== 'GESTOR'){
                 return res.status(403).json({ message: 'Perfil inválido' ,statusCode: '403', error: 'Forbidden'});
             }
-        }
+       // }
     
         
         
@@ -254,11 +305,12 @@ export async function rejeitarReembolso(req: Request, res: Response) {
             where: { id },
             data: {
                 status: 'REJEITADO',
+                justificativaRejeicao: data.justificativaRejeicao,
                 historicos: {
                     create: { 
                         acao: 'REJECTED', 
                         usuarioId: loggedUser.id, 
-                        observacao: 'Reembolso rejeitado por: '+loggedUser.nome
+                        observacao: 'Reembolso rejeitado por: '+loggedUser.nome+ ' com a justificativa de: '+data.justificativaRejeicao
                     }
                 }
             }
@@ -285,7 +337,7 @@ export async function cancelarReembolso(req: Request, res: Response){
        return res.status(404).json({ message: 'Reembolso não encontrado' ,statusCode: '404', error: 'Not Found'}); 
         } 
         
-        if(loggedUser.perfil !== 'ADMIN'){
+       // if(loggedUser.perfil !== 'ADMIN'){
 
             if (reembolso.status !== 'RASCUNHO'){
                 return res.status(400).json({ message: 'Apenas reembolsos em RASCUNHO podem ser cancelados' ,statusCode: '400', error: 'Bad Request'});
@@ -294,7 +346,7 @@ export async function cancelarReembolso(req: Request, res: Response){
             if(loggedUser.perfil !== 'COLABORADOR'){
                 return res.status(403).json({message: 'Perfil inválido', statusCode: '403', error:'Forbidden'})
             }
-        }
+      //  }
 
         const reembolsoCancelado = await prisma.solicitacaoReembolso.update({
             where: { id },
@@ -330,11 +382,11 @@ export async function pagarReembolso(req: Request, res: Response) {
     } 
 
     try{
-        if (!reembolso){
+       if (!reembolso){
             return res.status(404).json({ message: 'Reembolso não encontrado' ,statusCode: '404', error: 'Not Found'}); 
         } 
         
-        if(loggedUser.perfil !== 'ADMIN'){
+        //if(loggedUser.perfil !== 'ADMIN'){
 
             if (reembolso.status !== 'APROVADO'){
                 return res.status(400).json({ message: 'Apenas reembolsos APROVADOS podem ser pagos' ,statusCode: '400', error: 'Bad Request'});
@@ -343,7 +395,7 @@ export async function pagarReembolso(req: Request, res: Response) {
             if(loggedUser.perfil !== 'FINANCEIRO'){
                 return res.status(403).json({message: 'Perfil inválido', statusCode: '403', error:'Forbidden'})
             }
-        }
+       // }
 
         const reembolsoPago = await prisma.solicitacaoReembolso.update({
             where: { id },
@@ -386,7 +438,7 @@ export async function editarReembolso(req: Request, res: Response) {
         return res.status(404).json({ message: 'Reembolso não encontrado' ,statusCode: '404', error: 'Not Found'}); 
         } 
 
-        if(loggedUser.perfil !== 'ADMIN'){
+     //   if(loggedUser.perfil !== 'ADMIN'){
 
             if (reembolso.solicitanteId !== loggedUser.id) {
             return res.status(403).json({ message: 'Você só pode editar suas próprias solicitações' ,statusCode: '403', error: 'Forbidden'});
@@ -395,7 +447,7 @@ export async function editarReembolso(req: Request, res: Response) {
             if (reembolso.status !== 'RASCUNHO') {
                 return res.status(400).json({ message: 'Apenas solicitações em rascunho ou rejeitadas podem ser editadas' ,statusCode: '400', error: 'Bad Request'});
             }
-        }
+        //}
         
         
 

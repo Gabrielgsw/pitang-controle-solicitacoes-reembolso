@@ -25,6 +25,10 @@ export async function login(req: Request, res: Response) {
         return res.status(401).json({ message: 'Credenciais inválidas' });
     }
 
+    if (usuario.apagado) {
+        return res.status(401).json({ message: 'Usuário inativo. Entre em contato com o administrador.' });
+    }
+
     const senhaValida = bcrypt.compareSync(data.senha, usuario.senha);
 
     if (!senhaValida) {
