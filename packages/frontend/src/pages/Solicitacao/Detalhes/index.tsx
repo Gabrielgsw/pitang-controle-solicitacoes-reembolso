@@ -137,7 +137,7 @@ export function SolicitacaoDetail() {
                 <div>
                   <p className="text-sm text-muted-foreground">Descrição</p>
                   <p className="mt-1">{solicitacao.descricao}</p>
-                </div>
+                </div>                
                 {solicitacao.justificativaRejeicao && (
                   <div className="bg-red-50 p-4 border-l-4 border-pitang-red rounded-r-md">
                     <p className="text-sm font-semibold text-pitang-red">Justificativa de Rejeição:</p>
@@ -178,7 +178,7 @@ export function SolicitacaoDetail() {
                 <CardTitle className="text-lg">Ações Disponíveis</CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col gap-3">
-                {user?.perfil === 'COLABORADOR' && isDono && isRascunho && (
+                {user?.perfil === 'COLABORADOR' && isDono && isRascunho &&   (
                   <>
                     <Link to={`/solicitacao/${id}/editar`}>
                       <Button className="w-full" variant="outline">
