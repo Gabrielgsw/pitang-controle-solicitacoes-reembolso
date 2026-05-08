@@ -128,7 +128,7 @@ export function SolicitacaoForm() {
       } catch {
         toast.error('Erro ao buscar cotação. Tente novamente.');
         setLoading(false);
-        return; // ← aborta o submit se a conversão falhar
+        return; 
       }
     }
       const payload = {
