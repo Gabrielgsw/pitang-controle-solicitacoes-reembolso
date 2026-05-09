@@ -92,9 +92,7 @@ export function Login() {
             <Button type="submit" className="w-full" disabled={loading}>
               {loading ? 'Entrando...' : 'Entrar'}
             </Button>
-            <div className="text-sm text-center text-muted-foreground">
-              Não tem uma conta? <Link to="/cadastro" className="text-primary hover:underline">Cadastre-se</Link>
-            </div>
+            
           </CardFooter>
         </form>
       </Card>
